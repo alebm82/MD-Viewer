@@ -2,8 +2,9 @@
 
 A single-window Markdown editor with a live preview, written in C# for
 **Windows Forms / .NET Framework 4.8** and compiled with the C# compiler that
-ships inside Windows 10. No installer, no SDK, no NuGet packages, no server, no
-telemetry: the whole application is one small `MDViewer.exe`.
+ships inside Windows 10. No SDK, no NuGet packages, no server, no telemetry:
+the whole application is one small `MDViewer.exe`. You can run it as a portable
+executable or install it per user with the included MSI (with in-place upgrades).
 
 The preview uses the IE11 engine that is part of Windows, driven through
 `WebBrowser`; the HTML is generated locally by `src\Markdown.cs`.
@@ -68,6 +69,11 @@ Two things worth knowing:
 
 The dialogs of the installer come from the `WixToolset.UI.wixext` extension,
 which the script downloads into `installer\.wix\` the first time it builds.
+
+The package version defaults to the version in `src\AssemblyInfo.cs`
+(`AssemblyVersion`), which is what the installer uses to decide that a build is
+newer. Increase that version before shipping an upgrade, or pass
+`-Version x.y.z` to `build.bat msi` / `installer\build-msi.ps1`.
 
 ## Using it
 
@@ -256,6 +262,24 @@ right) and `---:` the end side. A table written in Latin keeps its own order.
 - The preview shell no longer carries a Content-Security-Policy meta tag (it
   blocked the small script that drives the picture viewer and the zoom); safety
   comes from the parser escaping all raw HTML and sanitising link schemes.
+
+## Credits
+
+من إنجاز وتصميم: محمد أيوب عالب - تقرت - الجزائر  
+Email: [alebm82@gmail.com](mailto:alebm82@gmail.com)
+
+## License
+
+MD Viewer is provided for personal and commercial use under the End User
+License Agreement shown by the installer (`installer\License.rtf`): it is
+provided "as is", without warranty, and you are responsible for keeping backups
+of your documents.
+
+The bundled reading, interface and code fonts come from the
+[Google Fonts](https://fonts.google.com/) collection (EB Garamond, Source Serif
+4, Noto Naskh Arabic, Amiri, Inter, IBM Plex Sans, IBM Plex Sans Arabic, Cairo,
+Tajawal, Noto Sans Arabic, JetBrains Mono, IBM Plex Mono) and are licensed
+under the [SIL Open Font License, Version 1.1](https://openfontlicense.org/).
 
 ## Replacing the icon
 
