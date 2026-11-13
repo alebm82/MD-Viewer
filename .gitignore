@@ -1,0 +1,19 @@
+# Build outputs
+bin/
+*.exe
+*.msi
+*.wixpdb
+
+# Installer caches/downloads
+installer/.wix/
+
+# Local user data / temp
+*.user
+*.suo
+*.log
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+publish-to-github.ps1

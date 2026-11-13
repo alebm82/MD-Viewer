@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    MD Viewer - Windows Installer package.
+
+    The package installs one program per user, under
+    %LOCALAPPDATA%\Programs\MD Viewer, so no administrator rights are needed.
+    The settings and the unpacked fonts stay in %LOCALAPPDATA%\MD Viewer and
+    are therefore untouched by an upgrade.
+
+    Upgrading: the UpgradeCode below never changes, and every build carries a
+    higher Version, so a new package finds the old one, removes it and puts the
+    new program in its place - no uninstall in between.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+    <Package Name="MD Viewer"
+             Manufacturer="MD Viewer"
+             Version="$(var.ProductVersion)"
+             UpgradeCode="{9C2B7A64-3F1D-4E58-9A2C-7D5E8B4F0136}"
+             Language="1033"
+             Scope="perUser"
+             Compressed="yes"
+             InstallerVersion="500">
+
+        <!-- The old product is removed after the new one has been prepared, so
+             the program is upgraded in place. -->
+        <MajorUpgrade AllowSameVersionUpgrades="yes"
+                      DowngradeErrorMessage="A newer version of MD Viewer is already installed."
+                      Schedule="afterInstallInitialize" />
+
+        <MediaTemplate EmbedCab="yes" />
+
+        <Icon Id="MDViewerIcon" SourceFile="$(var.ProjectDir)icon.ico" />
+        <Property Id="ARPPRODUCTICON" Value="MDViewerIcon" />
+        <Property Id="ProductDescription" Value="Markdown editor with a live preview" />
+
+        <!-- The license shown on the first page of the installer. -->
+        <WixVariable Id="WixUILicenseRtf" Value="$(var.InstallerDir)License.rtf" />
+
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+        <!-- The program keeps its own folder; the data lives elsewhere. -->
+        <StandardDirectory Id="LocalAppDataFolder">
+            <Directory Id="ProgramsFolder" Name="Programs">
+                <Directory Id="INSTALLFOLDER" Name="MD Viewer" />
+            </Directory>
+        </StandardDirectory>
+
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Directory Id="MDViewerMenuFolder" Name="MD Viewer" />
+        </StandardDirectory>
+
+        <Feature Id="Main" Title="MD Viewer" Description="The editor and its preview." Level="1">
+            <ComponentGroupRef Id="AppFiles" />
+            <ComponentRef Id="StartMenuShortcut" />
+        </Feature>
+
+        <Feature Id="FileAssociation"
+                 Title="Open .md files with MD Viewer"
+                 Description="Registers MD Viewer as a handler for Markdown files."
+                 Level="1">
+            <ComponentRef Id="MarkdownAssociation" />
+        </Feature>
+
+        <ui:WixUI xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui" Id="WixUI_InstallDir" />
+    </Package>
+
+    <Fragment>
+        <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+            <Component Id="AppExe" Guid="{4F1A2C58-6D93-4B07-8E51-2A9C6D3B7E14}">
+                <File Id="MDViewerExe" Source="$(var.ProjectDir)bin\MDViewer.exe" KeyPath="yes" />
+            </Component>
+            <Component Id="AppReadme" Guid="{6B3D8E15-2C47-4A9F-B6D0-3E85C1F4A902}">
+                <File Id="ReadmeFile" Source="$(var.ProjectDir)README.md" KeyPath="yes" />
+            </Component>
+        </ComponentGroup>
+
+        <Component Id="StartMenuShortcut" Directory="MDViewerMenuFolder" Guid="{8E5C1B37-9A24-4D6E-B3F1-7C2A8D5E0946}">
+            <Shortcut Id="AppShortcut"
+                      Name="MD Viewer"
+                      Description="Markdown editor with a live preview"
+                      Target="[INSTALLFOLDER]MDViewer.exe"
+                      WorkingDirectory="INSTALLFOLDER" />
+            <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall" />
+            <RegistryValue Root="HKCU"
+                           Key="Software\MD Viewer"
+                           Name="StartMenu"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+        </Component>
+
+        <!-- The same per-user registration the program writes itself. -->
+        <Component Id="MarkdownAssociation" Directory="INSTALLFOLDER" Guid="{2D9F4A63-8B15-4C72-9E38-5A1B7C6D2F80}">
+            <RegistryKey Root="HKCU" Key="Software\Classes\MDViewer.Markdown">
+                <RegistryValue Type="string" Value="Markdown Document" />
+                <RegistryValue Name="FriendlyTypeName" Type="string" Value="Markdown Document" />
+                <RegistryKey Key="DefaultIcon">
+                    <RegistryValue Type="string" Value="&quot;[INSTALLFOLDER]MDViewer.exe&quot;,0" />
+                </RegistryKey>
+                <RegistryKey Key="shell\open\command">
+                    <RegistryValue Type="string" Value="&quot;[INSTALLFOLDER]MDViewer.exe&quot; &quot;%1&quot;" />
+                </RegistryKey>
+            </RegistryKey>
+
+            <RegistryKey Root="HKCU" Key="Software\Classes\.md">
+                <RegistryValue Type="string" Value="MDViewer.Markdown" />
+                <RegistryKey Key="OpenWithProgids">
+                    <RegistryValue Name="MDViewer.Markdown" Type="binary" Value="0" />
+                </RegistryKey>
+            </RegistryKey>
+
+            <RegistryKey Root="HKCU" Key="Software\Classes\Applications\MDViewer.exe">
+                <RegistryValue Name="FriendlyAppName" Type="string" Value="MD Viewer" />
+                <RegistryKey Key="DefaultIcon">
+                    <RegistryValue Type="string" Value="&quot;[INSTALLFOLDER]MDViewer.exe&quot;,0" />
+                </RegistryKey>
+                <RegistryKey Key="shell\open\command">
+                    <RegistryValue Type="string" Value="&quot;[INSTALLFOLDER]MDViewer.exe&quot; &quot;%1&quot;" />
+                </RegistryKey>
+                <RegistryKey Key="SupportedTypes">
+                    <RegistryValue Name=".md" Type="string" Value="" />
+                </RegistryKey>
+            </RegistryKey>
+
+            <RegistryKey Root="HKCU" Key="Software\MDViewer\Capabilities">
+                <RegistryValue Name="ApplicationName" Type="string" Value="MD Viewer" />
+                <RegistryValue Name="ApplicationDescription" Type="string" Value="Markdown editor with a live preview" />
+                <RegistryKey Key="FileAssociations">
+                    <RegistryValue Name=".md" Type="string" Value="MDViewer.Markdown" />
+                </RegistryKey>
+            </RegistryKey>
+
+            <RegistryKey Root="HKCU" Key="Software\RegisteredApplications">
+                <RegistryValue Name="MD Viewer" Type="string" Value="Software\MDViewer\Capabilities" />
+            </RegistryKey>
+
+            <RegistryValue Root="HKCU"
+                           Key="Software\MD Viewer"
+                           Name="FileAssociation"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+        </Component>
+    </Fragment>
+</Wix>
